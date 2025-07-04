@@ -13,7 +13,7 @@ document.getElementById('input-form').addEventListener('submit', async function 
   document.getElementById('flashcard-back').textContent = 'Loading...';
 
   try {
-    const response = await fetch('/analyze', {
+    const response = await fetch('http://127.0.0.1:8000/analyze', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
