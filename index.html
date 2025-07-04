@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personalized Pronunciation Tutor</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Pronunciation Tutor</h1>
+
+    <form id="input-form">
+      <label for="user-input">Enter a word or phrase:</label>
+      <input type="text" id="user-input" name="user-input" required />
+      <button type="submit">Analyze</button>
+    </form>
+
+    <div id="output">
+      <h2>Results</h2>
+
+      <div class="phoneme-section">
+        <h3>Phoneme Representation</h3>
+        <p><strong>IPA:</strong> <span id="ipa-output">—</span></p>
+        <p><strong>Model Phonemes:</strong> <span id="model-output">—</span></p>
+      </div>
+
+      <div class="matches-section">
+        <h3>Similar Words</h3>
+        <ul id="similar-words"></ul>
+      </div>
+
+      <div class="media-section">
+        <h3>Example Clips</h3>
+        <div id="media-clips">Loading...</div>
+      </div>
+
+      <div class="art-section">
+        <h3>Phoneme Signature</h3>
+        <canvas id="phoneme-canvas" width="400" height="150"></canvas>
+      </div>
+
+      <div class="flashcard-section">
+        <h3>Flashcard</h3>
+        <div class="flashcard">
+          <div class="front">
+            <p id="flashcard-front">Your word here</p>
+          </div>
+          <div class="back">
+            <p id="flashcard-back">IPA, phonemes, artwork</p>
+          </div>
+        </div>
+        <button onclick="flipFlashcard()">Flip</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
