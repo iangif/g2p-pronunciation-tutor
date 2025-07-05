@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from g2p_en import G2p
 from nltk.corpus import cmudict
 from difflib import SequenceMatcher
+from wordfreq import word_frequency
 
 app = FastAPI()
 g2p = G2p()
@@ -71,7 +72,11 @@ def get_similar_phoneme_words(target_arpa, max_distance=1):
                 similar.append((word, arpa, dist))
     
     # sort by lowest distance
-    similar.sort(key=lambda x: (x[2], weight_by_position(target_arpa, x[1])))
+    similar.sort(key=lambda x: (
+        x[2],
+        weight_by_position(target_arpa, x[1]),
+        -word_frequency(x[0], 'en') if word_frequency(x[0], 'en') else -1e-9
+    ))
     return similar
 
 def find_similar_words_with_ipa(input_arpa, input_text, max_results=12, max_dist=3):
@@ -160,12 +165,13 @@ async def analyze_text(request: AnalyzeRequest):
     # Convert to phonemes
     phonemes = [p for p in g2p(input_text) if p != ' ']
     phoneme_str = ' '.join(phonemes)
-
-    # Mock IPA for now
     
+    # Convert phonemes to IPA
     ipa = '/' + ''.join([arpa_to_ipa(p) for p in phonemes]) + '/'
 
+    # Find similar words and mark differences
     similar_words = find_similar_words_with_ipa(phonemes, input_text)
+
     mock_media_clips = [
         {"url": "https://www.example.com/audio/mock1.mp3"},
         {"url": "https://www.example.com/audio/mock2.mp3"}
