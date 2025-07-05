@@ -29,10 +29,13 @@ document.getElementById('input-form').addEventListener('submit', async function 
     document.getElementById('ipa-output').textContent = data.ipa;
     document.getElementById('model-output').textContent = data.modelPhonemes;
 
-    data.similarWords.forEach(word => {
+
+    data.similarWords.forEach(entry => {
       const li = document.createElement('li');
-      li.textContent = word;
-      document.getElementById('similar-words').appendChild(li);
+      li.innerHTML = `
+        <strong>${entry.word}</strong> — <em>${entry.ipa}</em><br/><small>${entry.phonemes}</small>
+      `;
+      document.getElementById('similar-words').appendChild(li)
     });
 
     document.getElementById('media-clips').innerHTML = data.mediaClips.map(clip => {
