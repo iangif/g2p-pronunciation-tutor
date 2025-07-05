@@ -23,7 +23,7 @@ An interactive tool for language learners to improve pronunciation by exploring 
     pip install fastapi uvicorn g2p-en nltk wordfreq
     ```
 
-2. Run the backend:
+2. Run the backend (in backend folder):
     ```bash
     uvicorn main:app --reload
     ```
