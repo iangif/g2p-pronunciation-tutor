@@ -7,7 +7,7 @@ from g2p_en import G2p
 from nltk.corpus import cmudict
 from difflib import SequenceMatcher
 from wordfreq import word_frequency
-from db import setup_database
+from db import setup_database, find_clips_by_phoneme_substring, find_near_phoneme_clips
 
 setup_database()
 app = FastAPI()
@@ -163,29 +163,40 @@ def find_ipa_diff(base_arpa, compare_arpa):
 
 
 @app.post("/analyze/{language}", response_model=AnalyzeResponse)
-async def analyze_text(language: str = Path(..., regex="^(en|fr)$"), request: AnalyzeRequest = None):
+async def analyze_text(language: str = Path(..., pattern="^(en|fr)$"), request: AnalyzeRequest = None):
     input_text = request.text.strip()
 
+    max_clip_results = 6
     if language == "en":
         phonemes = [p for p in g2p(input_text) if p != ' ']
         phoneme_str = ' '.join(phonemes)
         ipa = '/' + ''.join([arpa_to_ipa(p) for p in phonemes]) + '/'
         similar_words = find_similar_words_with_ipa(phonemes, input_text)
+
+        # Video clip lookup
+        media_clips = find_clips_by_phoneme_substring(
+            # Remove stress marker
+            ' '.join([p[:-1] if p[-1] in '012' else p for p in phonemes]),
+            lang='en',
+            max_results = max_clip_results
+        )
+        if len(media_clips) != 6:
+            media_clips = find_near_phoneme_clips(
+                ' '.join([p[:-1] if p[-1] in '012' else p for p in phonemes]),
+                lang='en',
+                max_results = max_clip_results - len(media_clips)
+            )
     elif language == "fr":
         phonemes = ["placeholder"]
         phoneme_str = 'placeholder'
         ipa = '/placeholder/'
         similar_words = []
-
-    mock_media_clips = [
-        {"url": "https://www.example.com/audio/mock1.mp3"},
-        {"url": "https://www.example.com/audio/mock2.mp3"}
-    ]
+        media_clips = []
 
     return AnalyzeResponse(
         inputWord=input_text,
         ipa=ipa,
         modelPhonemes=phoneme_str,
         similarWords=similar_words,
-        mediaClips=mock_media_clips
+        mediaClips=media_clips
     )
