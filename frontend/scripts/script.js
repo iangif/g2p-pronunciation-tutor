@@ -101,8 +101,19 @@ document.getElementById('input-form').addEventListener('submit', async function 
       document.getElementById('similar-words').appendChild(li);
     }
 
+    /* Audio only
     document.getElementById('media-clips').innerHTML = data.mediaClips.map(clip => {
       return `<audio controls src="${clip.url}"></audio>`;
+    }).join('');
+    */
+
+    document.getElementById('media-clips').innerHTML = data.mediaClips.map(clip => {
+      return `
+        <video controls width="255">
+          <source src="${clip.url}" type="video/mp4">
+          Your browser does not support the video tag. 
+        </video>
+      `;
     }).join('');
 
     document.getElementById('flashcard-back').innerHTML = `
@@ -245,9 +256,20 @@ function updateUILanguage() {
   });
 
   // Media
+  /* Audio only
   document.getElementById('media-clips').innerHTML = state.mediaClips.map(
     clip => `<audio controls src="${clip.url}"></audio>`
   ).join('');
+  */
+  document.getElementById('media-clips').innerHTML = state.mediaClips.map(clip => {
+    return `
+      <video controls width="255">
+        <source src="${clip.url}" type="video/mp4">
+        Your browser does not support the video tag. 
+      </video>
+    `;
+  }).join('');
+  
 
   // Redraw canvas
   const canvas = document.getElementById('phoneme-canvas');
