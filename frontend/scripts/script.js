@@ -81,9 +81,7 @@ document.getElementById('input-form').addEventListener('submit', async function 
     const inputWord = data.inputWord || '...';
     const wordSpan = document.getElementById('input-word');
     const tooltipSpan = document.getElementById('input-word-tooltip');
-
     wordSpan.textContent = inputWord;
-
     fetchDefinition(inputWord).then(def => {
       tooltipSpan.textContent = def || "Definition not found";
     });
