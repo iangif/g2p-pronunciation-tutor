@@ -7,7 +7,9 @@ from g2p_en import G2p
 from nltk.corpus import cmudict
 from difflib import SequenceMatcher
 from wordfreq import word_frequency
+from db import setup_database
 
+setup_database()
 app = FastAPI()
 g2p = G2p()
 cmu = cmudict.dict()
