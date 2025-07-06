@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Path
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -35,6 +35,7 @@ class SimilarWord(BaseModel):
     phonemes: str
 
 class AnalyzeResponse(BaseModel):
+    inputWord: str
     ipa: str
     modelPhonemes: str
     similarWords: List[SimilarWord]
@@ -95,6 +96,7 @@ def find_similar_words_with_ipa(input_arpa, input_text, max_results=12, max_dist
             result.append(SimilarWord(word=word, ipa=ipa_diff, phonemes=' '.join(arpa)))
             if len(result) >= max_results:
                 return result
+    
     return result
 
 # Convert english arpabet to ipa
@@ -158,19 +160,20 @@ def find_ipa_diff(base_arpa, compare_arpa):
     return '/' + ''.join(aligned) + '/'
 
 
-@app.post("/analyze", response_model=AnalyzeResponse)
-async def analyze_text(request: AnalyzeRequest):
+@app.post("/analyze/{language}", response_model=AnalyzeResponse)
+async def analyze_text(language: str = Path(..., regex="^(en|fr)$"), request: AnalyzeRequest = None):
     input_text = request.text.strip()
 
-    # Convert to phonemes
-    phonemes = [p for p in g2p(input_text) if p != ' ']
-    phoneme_str = ' '.join(phonemes)
-    
-    # Convert phonemes to IPA
-    ipa = '/' + ''.join([arpa_to_ipa(p) for p in phonemes]) + '/'
-
-    # Find similar words and mark differences
-    similar_words = find_similar_words_with_ipa(phonemes, input_text)
+    if language == "en":
+        phonemes = [p for p in g2p(input_text) if p != ' ']
+        phoneme_str = ' '.join(phonemes)
+        ipa = '/' + ''.join([arpa_to_ipa(p) for p in phonemes]) + '/'
+        similar_words = find_similar_words_with_ipa(phonemes, input_text)
+    elif language == "fr":
+        phonemes = ["placeholder"]
+        phoneme_str = 'placeholder'
+        ipa = '/placeholder/'
+        similar_words = []
 
     mock_media_clips = [
         {"url": "https://www.example.com/audio/mock1.mp3"},
@@ -178,6 +181,7 @@ async def analyze_text(request: AnalyzeRequest):
     ]
 
     return AnalyzeResponse(
+        inputWord=input_text,
         ipa=ipa,
         modelPhonemes=phoneme_str,
         similarWords=similar_words,
