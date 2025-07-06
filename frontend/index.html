@@ -8,25 +8,34 @@
 </head>
 <body>
   <div class="container">
+    <button id="dark-toggle">Dark Mode</button>
+    <button id="lang-toggle">🇺🇸 English</button>
+    
     <h1>Pronunciation Tutor</h1>
 
     <form id="input-form">
       <label for="user-input">Enter a word or phrase:</label>
-      <input type="text" id="user-input" name="user-input" required />
-      <button type="submit">Analyze</button>
+      <div class="input-row">
+        <input type="text" id="user-input" name="user-input" required />
+        <button type="submit">Analyze</button>
+        <button type="button" id="clear-button">Clear</button>
+      </div>
     </form>
 
     <div id="output">
       <h2>Results</h2>
 
       <div class="phoneme-section">
-        <h3>Phoneme Representation</h3>
+        <h3 id="phoneme-title" class="tooltip-container">
+          Phoneme Representation of <span id="input-word" class="hover-word">...</span>
+          <span id="input-word-tooltip" class="tooltip-text">Definition loading...</span>
+        </h3>
         <p><strong>IPA:</strong> <span id="ipa-output">—</span></p>
         <p><strong>Model Phonemes:</strong> <span id="model-output">—</span></p>
       </div>
 
       <div class="matches-section">
-        <h3>Similar Words</h3>
+        <h3>Similar Sounding Words</h3>
         <ul id="similar-words"></ul>
       </div>
 
