@@ -88,7 +88,7 @@ document.getElementById('input-form').addEventListener('submit', async function 
       tooltipSpan.textContent = def || "Definition not found";
     });
 
-    data.similarWords.forEach(async (entry) => {
+    for (const entry of data.similarWords) {
       const li = document.createElement('li');
       const definition = await fetchDefinition(entry.word);
       const tooltip = definition ? definition : "Definition not found";
@@ -100,8 +100,8 @@ document.getElementById('input-form').addEventListener('submit', async function 
         </span>
         — <em>${entry.ipa}</em><br/><small>${displayPhonemes(entry.phonemes)}</small>
       `;
-      document.getElementById('similar-words').appendChild(li)
-    });
+      document.getElementById('similar-words').appendChild(li);
+    }
 
     document.getElementById('media-clips').innerHTML = data.mediaClips.map(clip => {
       return `<audio controls src="${clip.url}"></audio>`;
@@ -223,7 +223,7 @@ function updateUILanguage() {
 
   document.getElementById('user-input').value = state.input || '';
   document.getElementById('ipa-output').textContent = state.ipa || '—';
-  document.getElementById('model-output').textContent = state.modelPhonemes || '—';
+  document.getElementById('model-output').textContent = displayPhonemes(state.modelPhonemes) || '—';
 
   // Input word and tooltip
   document.getElementById('input-word').textContent = state.input || '...';
@@ -241,7 +241,7 @@ function updateUILanguage() {
         <strong class="hover-word">${entry.word}</strong>
         <span class="tooltip-text">${entry.definition || ''}</span>
       </span>
-      — <em>${entry.ipa}</em><br/><small>${entry.phonemes}</small>
+      — <em>${entry.ipa}</em><br/><small>${displayPhonemes(entry.phonemes)}</small>
     `;
     similarList.appendChild(li);
   });
