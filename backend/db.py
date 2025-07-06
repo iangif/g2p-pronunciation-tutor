@@ -16,7 +16,8 @@ def setup_database():
             video_url TEXT NOT NULL,
             start_time REAL NOT NULL,
             end_time REAL NOT NULL,
-            transcript TEXT
+            transcript TEXT,
+            UNIQUE(video_url, start_time, end_time)
         )
     ''')
     conn.commit()
@@ -25,12 +26,16 @@ def setup_database():
 def insert_clip(word, phonemes, video_url, start_time, end_time, transcript=None):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO clips (word, phonemes, video_url, start_time, end_time, transcript)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (word, phonemes, video_url, start_time, end_time, transcript))
-    conn.commit()
-    conn.close()
+    try:
+      cursor.execute('''
+          INSERT INTO clips (word, phonemes, video_url, start_time, end_time, transcript)
+          VALUES (?, ?, ?, ?, ?, ?)
+      ''', (word, phonemes, video_url, start_time, end_time, transcript))
+      conn.commit()
+    except sqlite3.IntegrityError:
+      print("Clip already exists. Skipping duplicate.")
+    finally:
+      conn.close()
 
 def search_clips_by_phonemes(phonemes):
     conn = get_connection()
