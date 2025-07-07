@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import random
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "data", "clips.db")
 
@@ -60,13 +61,17 @@ def find_clips_by_phoneme_substring(phoneme_seq, lang='en', max_results=6):
         "end": float(row[4]),
         "transcript": row[5]
       })
+      """ Uncomment to not randomize
       if len(matches) >= max_results:
         break
+      """
   conn.close()
-  return matches
+  output=random.sample(matches, min(len(matches), max_results))
+  return output
 
 # Finds near-match phonemes, matching substring. ex: white --> quite
-def find_near_phoneme_clips(phoneme_seq, lang='en', max_results=6):
+# Include ignore list to ignore certain matches
+def find_near_phoneme_clips(phoneme_seq, lang='en', max_results=6, ignore=[]):
   conn = get_connection()
   cursor = conn.cursor()
   cursor.execute("""
@@ -76,6 +81,13 @@ def find_near_phoneme_clips(phoneme_seq, lang='en', max_results=6):
   """, (lang,))
   matches = []
   for row in cursor.fetchall():
+    is_in_ignore = False
+    for entry in ignore:
+      if row[2] == entry["url"] and float(row[3]) == entry["start"] and float(row[4]) == entry["end"]:
+        is_in_ignore = True
+        break
+    if is_in_ignore:
+      continue
     db_phonemes = row[1]
     if phoneme_seq in db_phonemes:
       matches.append({
@@ -88,5 +100,6 @@ def find_near_phoneme_clips(phoneme_seq, lang='en', max_results=6):
       })
       if len(matches) >= max_results:
         break
+      
   conn.close()
   return matches
