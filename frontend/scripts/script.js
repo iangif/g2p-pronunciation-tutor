@@ -108,11 +108,27 @@ document.getElementById('input-form').addEventListener('submit', async function 
     */
 
     document.getElementById('media-clips').innerHTML = data.mediaClips.map(clip => {
+      const url = new URL(clip.url);
+      const videoId = url.searchParams.get("v");
+
+      const start = Math.floor(clip.start || 0) - 1
+      if (start < 0) {
+        start = 0;
+      }
+      const end = Math.floor(clip.end || 0) + 1
+
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?start=${start}&end=${end}&version=3&autoplay=0&rel=0`;
+
       return `
-        <video controls width="255">
-          <source src="${clip.url}" type="video/mp4">
-          Your browser does not support the video tag. 
-        </video>
+        <div class="video-clip">
+          <iframe width="255" height="150"
+            src="${embedUrl}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+          <div class="clip-caption"><small>${clip.transcript || 'no transcript'}</small></div>
+        </div>
       `;
     }).join('');
 
@@ -262,11 +278,27 @@ function updateUILanguage() {
   ).join('');
   */
   document.getElementById('media-clips').innerHTML = state.mediaClips.map(clip => {
+    const url = new URL(clip.url);
+    const videoId = url.searchParams.get("v");
+
+    const start = Math.floor(clip.start || 0) - 1
+    if (start < 0) {
+      start = 0;
+    }
+    const end = Math.floor(clip.end || 0) + 1
+
+    const embedUrl = `https://www.youtube.com/embed/${videoId}?start=${start}&end=${end}&version=3&autoplay=0&rel=0`;
+
     return `
-      <video controls width="255">
-        <source src="${clip.url}" type="video/mp4">
-        Your browser does not support the video tag. 
-      </video>
+      <div class="video-clip">
+        <iframe width="255" height="150"
+          src="${embedUrl}"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+        <div class="clip-caption"><small>${clip.transcript || 'no transcript'}</small></div>
+      </div>
     `;
   }).join('');
   

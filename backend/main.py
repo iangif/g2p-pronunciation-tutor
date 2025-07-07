@@ -29,7 +29,12 @@ class AnalyzeRequest(BaseModel):
 
 # Define response model
 class MediaClip(BaseModel):
+    word: str
+    phonemes: str
     url: str
+    start: float
+    end: float
+    transcript: str
 
 class SimilarWord(BaseModel):
     word: str
@@ -181,7 +186,7 @@ async def analyze_text(language: str = Path(..., pattern="^(en|fr)$"), request: 
             max_results = max_clip_results
         )
         if len(media_clips) != 6:
-            media_clips = find_near_phoneme_clips(
+            media_clips += find_near_phoneme_clips(
                 ' '.join([p[:-1] if p[-1] in '012' else p for p in phonemes]),
                 lang='en',
                 max_results = max_clip_results - len(media_clips)
@@ -193,6 +198,17 @@ async def analyze_text(language: str = Path(..., pattern="^(en|fr)$"), request: 
         similar_words = []
         media_clips = []
 
+    media_clips = [
+        MediaClip(
+            word=mc['word'],
+            phonemes=mc['phonemes'],
+            url=mc['url'],
+            start=mc['start'],
+            end=mc['end'],
+            transcript=mc['transcript']
+        )
+        for mc in media_clips
+    ]
     return AnalyzeResponse(
         inputWord=input_text,
         ipa=ipa,

@@ -1,5 +1,9 @@
 from db import insert_clip
 
+"""
+This file is only meant for inserting test clips into the database
+"""
+
 def seed_test_clips():
   test_clips = [
     {

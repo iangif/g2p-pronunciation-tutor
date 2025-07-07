@@ -1,0 +1,9 @@
+Make sure clips.db is deleted if starting from beginning
+To create new database run main.py
+
+To get new clips make sure all_aligned_clips, raw_audio, and transcripts are all EMPTY
+then run these files in this order:
+  video_downloader.py
+  transcribe_audio.py
+  align_phonemes.py
+  store_clips.py
