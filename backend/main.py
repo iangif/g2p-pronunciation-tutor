@@ -189,7 +189,8 @@ async def analyze_text(language: str = Path(..., pattern="^(en|fr)$"), request: 
             media_clips += find_near_phoneme_clips(
                 ' '.join([p[:-1] if p[-1] in '012' else p for p in phonemes]),
                 lang='en',
-                max_results = max_clip_results - len(media_clips)
+                max_results = max_clip_results - len(media_clips),
+                ignore=media_clips
             )
     elif language == "fr":
         phonemes = ["placeholder"]
@@ -205,7 +206,8 @@ async def analyze_text(language: str = Path(..., pattern="^(en|fr)$"), request: 
             url=mc['url'],
             start=mc['start'],
             end=mc['end'],
-            transcript=mc['transcript']
+            # bolds and italicizes word in transcript
+            transcript=mc['transcript'].lower().replace(mc['word'], '<i><b>'+mc['word']+'</b></i>')
         )
         for mc in media_clips
     ]
