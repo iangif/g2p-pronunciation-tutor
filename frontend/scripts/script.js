@@ -1,4 +1,14 @@
-const definitionCache = {};
+import {
+  displayPhonemes,
+  fetchDefinition,
+  drawPhonemeSignature,
+  definitionCache,
+  flipFlashcard,
+  renderMediaClips,
+  createSimilarWordItem,
+  renderFlashcardBack,
+  renderFlashcardFront } from "./utils.js";
+
 const defaultState = {
   en: { input: '', ipa: '', modelPhonemes: '', similarWords: [], mediaClips: [] },
   fr: { input: '', ipa: '', modelPhonemes: '', similarWords: [], mediaClips: [] }
@@ -10,7 +20,7 @@ const translations = {
   en: {
     analyze: "Analyze",
     clear: 'Clear',
-    inputLabel: "Enter a word or phrase:",
+    inputLabel: "Enter a word:",
     results: "Results",
     phonemeTitle: "Phoneme Representation of",
     similarWords: "Similar Sounding Words",
@@ -24,7 +34,7 @@ const translations = {
   fr: {
     analyze: "Analyser",
     clear: 'Effacer',
-    inputLabel: "Entrez un mot ou une phrase:",
+    inputLabel: "Entrez un mot:",
     results: "Résultats",
     phonemeTitle: "Représentation phonémique de",
     similarWords: "Mots au son similaire",
@@ -37,15 +47,7 @@ const translations = {
   }
 };
 
-// Returns new arpa phonemes with stress markers removed
-// Input/Output: phoneme strings
-function displayPhonemes(phonemes) {
-  return phonemes
-    .split(' ')
-    .map(p => /[012]$/.test(p) ? p.slice(0, -1) : p)
-    .join(' ')
-}
-
+// Submitting logic
 document.getElementById('input-form').addEventListener('submit', async function (e) {
   e.preventDefault();
 
@@ -57,7 +59,7 @@ document.getElementById('input-form').addEventListener('submit', async function 
   document.getElementById('model-output').textContent = 'Loading...';
   document.getElementById('similar-words').innerHTML = '';
   document.getElementById('media-clips').textContent = 'Loading...';
-  document.getElementById('flashcard-front').textContent = input;
+  document.getElementById('flashcard-front').textContent = 'Loading...';
   document.getElementById('flashcard-back').textContent = 'Loading...';
 
   try {
@@ -86,66 +88,24 @@ document.getElementById('input-form').addEventListener('submit', async function 
       tooltipSpan.textContent = def || "Definition not found";
     });
 
+    // Similar words
     for (const entry of data.similarWords) {
-      const li = document.createElement('li');
       const definition = await fetchDefinition(entry.word);
-      const tooltip = definition ? definition : "Definition not found";
-
-      li.innerHTML = `
-        <span class="tooltip-container">
-          <strong class="hover-word">${entry.word}</strong>
-          <span class="tooltip-text">${tooltip}</span>
-        </span>
-        — <em>${entry.ipa}</em><br/><small>${displayPhonemes(entry.phonemes)}</small>
-      `;
+      const tooltip = definition || "Definition not found";
+      const li = createSimilarWordItem(entry, tooltip);
       document.getElementById('similar-words').appendChild(li);
     }
 
-    /* Audio only
-    document.getElementById('media-clips').innerHTML = data.mediaClips.map(clip => {
-      return `<audio controls src="${clip.url}"></audio>`;
-    }).join('');
-    */
+    // Media clips
+    document.getElementById('media-clips').innerHTML = renderMediaClips(data.mediaClips);
 
-    document.getElementById('media-clips').innerHTML = data.mediaClips.map(clip => {
-      const url = new URL(clip.url);
-      const videoId = url.searchParams.get("v");
+    // Flashcards
+    document.getElementById('flashcard-back').innerHTML = renderFlashcardBack(data);
+    document.getElementById('flashcard-front').textContent = renderFlashcardFront(input);
 
-      const start = Math.floor(clip.start || 0) - 1
-      if (start < 0) {
-        start = 0;
-      }
-      const end = Math.floor(clip.end || 0) + 1
+    // Draw phoneme signature
+    drawPhonemeSignature(document.getElementById('phoneme-canvas'), data.modelPhonemes);
 
-      const embedUrl = `https://www.youtube.com/embed/${videoId}?start=${start}&end=${end}&version=3&autoplay=0&rel=0`;
-
-      return `
-        <div class="video-clip">
-          <iframe width="255" height="150"
-            src="${embedUrl}"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen>
-          </iframe>
-          <div class="clip-caption"><small>${clip.transcript || 'no transcript'}</small></div>
-        </div>
-      `;
-    }).join('');
-
-    document.getElementById('flashcard-back').innerHTML = `
-      <strong>IPA:</strong> ${data.ipa}<br />
-      <strong>Phonemes:</strong> ${data.modelPhonemes}<br />
-      <em>+ phoneme signature graphic</em>
-    `;
-
-    // Draw phoneme signature (simplified demo)
-    const canvas = document.getElementById('phoneme-canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    data.modelPhonemes.split(' ').forEach((phoneme, i) => {
-      ctx.fillStyle = `hsl(${i * 45 % 360}, 70%, 60%)`;
-      ctx.fillRect(i * 40 + 10, 100 - (i % 4) * 20, 30, (i % 4) * 20 + 20);
-    });
 
     // Store language state
     languageState[currentLang] = {
@@ -165,6 +125,7 @@ document.getElementById('input-form').addEventListener('submit', async function 
   }
 });
 
+// Clear button logic
 document.getElementById('clear-button').addEventListener('click', () => {
   languageState[currentLang] = {
     input: '',
@@ -177,27 +138,10 @@ document.getElementById('clear-button').addEventListener('click', () => {
   updateUILanguage();
 });
 
-async function fetchDefinition(word) {
-  if (definitionCache[word]) {
-    return definitionCache[word];
-  }
-
-  try {
-    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-    if (!res.ok) return null;
-    const data = await res.json();
-    const def = data[0]?.meanings[0]?.definitions[0]?.definition;
-    definitionCache[word] = def;
-    return def || null;
-  } catch {
-    return null;
-  }
-}
-
-function flipFlashcard() {
-  const card = document.querySelector('.flashcard');
-  card.classList.toggle('flipped');
-}
+// Flip button logic
+document.getElementById('flip-button').addEventListener('click', () => {
+  flipFlashcard();
+})
 
 // Dark mode toggle logic
 const darkToggle = document.getElementById('dark-toggle');
@@ -226,6 +170,7 @@ langToggle.addEventListener('click', () => {
   updateUILanguage();
 });
 
+// Update UI Logic (when refresh, language swap, etc.)
 function updateUILanguage() {
   const t = translations[currentLang];
 
@@ -240,7 +185,6 @@ function updateUILanguage() {
   document.querySelector('.art-section h3').textContent = t.signature;
   document.querySelector('.flashcard-section h3').textContent = t.flashcard;
   document.getElementById('flashcard-front').textContent = t.flashcardFront;
-  document.getElementById('flashcard-back').textContent = t.flashcardBack;
   langToggle.textContent = t.langToggle;
 
   // Load state for selected language
@@ -260,56 +204,24 @@ function updateUILanguage() {
   const similarList = document.getElementById('similar-words');
   similarList.innerHTML = '';
   state.similarWords.forEach(entry => {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <span class="tooltip-container">
-        <strong class="hover-word">${entry.word}</strong>
-        <span class="tooltip-text">${entry.definition || ''}</span>
-      </span>
-      — <em>${entry.ipa}</em><br/><small>${displayPhonemes(entry.phonemes)}</small>
-    `;
+    const li = createSimilarWordItem(entry, entry.definition || '');
     similarList.appendChild(li);
   });
 
-  // Media
-  /* Audio only
-  document.getElementById('media-clips').innerHTML = state.mediaClips.map(
-    clip => `<audio controls src="${clip.url}"></audio>`
-  ).join('');
-  */
-  document.getElementById('media-clips').innerHTML = state.mediaClips.map(clip => {
-    const url = new URL(clip.url);
-    const videoId = url.searchParams.get("v");
+  // Media clips
+  document.getElementById('media-clips').innerHTML = renderMediaClips(state.mediaClips);
 
-    const start = Math.floor(clip.start || 0) - 1
-    if (start < 0) {
-      start = 0;
-    }
-    const end = Math.floor(clip.end || 0) + 1
+  // Flashcards
+  if (state.ipa && state.modelPhonemes) {
+    document.getElementById('flashcard-back').innerHTML = renderFlashcardBack(state);  
+  } else {
+    document.getElementById('flashcard-back').textContent = t.flashcardBack;
+  }
 
-    const embedUrl = `https://www.youtube.com/embed/${videoId}?start=${start}&end=${end}&version=3&autoplay=0&rel=0`;
-
-    return `
-      <div class="video-clip">
-        <iframe width="255" height="150"
-          src="${embedUrl}"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-        </iframe>
-        <div class="clip-caption"><small>${clip.transcript || 'no transcript'}</small></div>
-      </div>
-    `;
-  }).join('');
-  
+  document.getElementById('flashcard-front').textContent = renderFlashcardFront(state.input);
 
   // Redraw canvas
-  const canvas = document.getElementById('phoneme-canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  state.modelPhonemes.split(' ').forEach((phoneme, i) => {
-    ctx.fillStyle = `hsl(${i * 45 % 360}, 70%, 60%)`;
-    ctx.fillRect(i * 40 + 10, 100 - (i % 4) * 20, 30, (i % 4) * 20 + 20);
-  });
+  drawPhonemeSignature(document.getElementById('phoneme-canvas'), state.modelPhonemes);
+
 }
 updateUILanguage(); // apply language on initial load
