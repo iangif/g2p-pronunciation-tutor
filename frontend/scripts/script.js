@@ -7,8 +7,13 @@ import {
   renderMediaClips,
   createSimilarWordItem,
   renderFlashcardBack,
-  renderFlashcardFront } from "./utils.js";
+  renderFlashcardFront,
+  translations,
+  showSpinner,
+  hideSpinner
+} from "./utils.js";
 
+// Refresh logic
 const defaultState = {
   en: { input: '', ipa: '', modelPhonemes: '', similarWords: [], mediaClips: [] },
   fr: { input: '', ipa: '', modelPhonemes: '', similarWords: [], mediaClips: [] }
@@ -16,40 +21,19 @@ const defaultState = {
 const languageState = JSON.parse(localStorage.getItem('languageState')) || defaultState;
 const defaultLang = 'en'; // default to English
 let currentLang = JSON.parse(localStorage.getItem('currentLanguage')) || defaultLang;
-const translations = {
-  en: {
-    analyze: "Analyze",
-    clear: 'Clear',
-    inputLabel: "Enter a word:",
-    results: "Results",
-    phonemeTitle: "Phoneme Representation of",
-    similarWords: "Similar Sounding Words",
-    clips: "Example Clips",
-    signature: "Phoneme Signature",
-    flashcard: "Flashcard",
-    flashcardFront: "Your word here",
-    flashcardBack: "IPA, phonemes, artwork",
-    langToggle: "🇺🇸 English"
-  },
-  fr: {
-    analyze: "Analyser",
-    clear: 'Effacer',
-    inputLabel: "Entrez un mot:",
-    results: "Résultats",
-    phonemeTitle: "Représentation phonémique de",
-    similarWords: "Mots au son similaire",
-    clips: "Exemples audio",
-    signature: "Signature phonémique",
-    flashcard: "Carte mémoire",
-    flashcardFront: "Votre mot ici",
-    flashcardBack: "API, phonèmes, illustration",
-    langToggle: "🇫🇷 Français"
-  }
-};
+// Handle output animation on refresh
+if (currentLang === 'en' && !(languageState.en.input === '')) {
+  document.getElementById('output').classList.add('visible');
+}
+if (currentLang === 'fr' && !(languageState.fr.input === '')) {
+  document.getElementById('output').classList.add('visible');
+}
+
 
 // Submitting logic
 document.getElementById('input-form').addEventListener('submit', async function (e) {
   e.preventDefault();
+  document.getElementById('output').classList.remove('visible');
 
   const input = document.getElementById('user-input').value.trim();
   if (!input) return;
@@ -62,6 +46,7 @@ document.getElementById('input-form').addEventListener('submit', async function 
   document.getElementById('flashcard-front').textContent = 'Loading...';
   document.getElementById('flashcard-back').textContent = 'Loading...';
 
+  showSpinner();
   try {
     const response = await fetch(`http://127.0.0.1:8000/analyze/${currentLang}`, {
       method: 'POST',
@@ -119,9 +104,14 @@ document.getElementById('input-form').addEventListener('submit', async function 
       mediaClips: data.mediaClips
     };
     localStorage.setItem('languageState', JSON.stringify(languageState));
+
+    // Load animation
+    document.getElementById('output').classList.add('visible');
+    hideSpinner();
   } catch (err) {
     console.error(err);
     alert('There was a problem analyzing your input.');
+    hideSpinner();
   }
 });
 
@@ -136,6 +126,7 @@ document.getElementById('clear-button').addEventListener('click', () => {
   };
   localStorage.setItem('languageState', JSON.stringify(languageState));
   updateUILanguage();
+  document.getElementById('output').classList.remove('visible');
 });
 
 // Flip button logic
@@ -169,6 +160,15 @@ langToggle.addEventListener('click', () => {
   localStorage.setItem('currentLanguage', JSON.stringify(currentLang));
   updateUILanguage();
 });
+
+// Click on similar word event
+window.addEventListener('similar-word-clicked', (e) => {
+  const newWord = e.detail;
+  document.getElementById('user-input').value = newWord;
+
+  // Trigger form submission
+  document.getElementById('input-form').dispatchEvent(new Event('submit'));
+})
 
 // Update UI Logic (when refresh, language swap, etc.)
 function updateUILanguage() {
@@ -204,7 +204,7 @@ function updateUILanguage() {
   const similarList = document.getElementById('similar-words');
   similarList.innerHTML = '';
   state.similarWords.forEach(entry => {
-    const li = createSimilarWordItem(entry, entry.definition || '');
+    const li = createSimilarWordItem(entry, entry.definition);
     similarList.appendChild(li);
   });
 
