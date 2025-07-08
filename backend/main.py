@@ -207,7 +207,7 @@ async def analyze_text(language: str = Path(..., pattern="^(en|fr)$"), request: 
             start=mc['start'],
             end=mc['end'],
             # bolds and italicizes word in transcript
-            transcript=mc['transcript'].lower().replace(mc['word'], '<i><b>'+mc['word']+'</b></i>')
+            transcript=mc['transcript'].lower().replace(' '+mc['word'], ' <i><b>'+mc['word']+'</b></i>').replace(mc['word']+' ', '<i><b>'+mc['word']+'</b></i> ')
         )
         for mc in media_clips
     ]
