@@ -392,3 +392,16 @@ body.dark-mode .dot-loader .dot {
   50% { opacity: 1; }
   100% { opacity: 0.2; }
 }
+
+canvas {
+  display: block;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#phoneme-canvas {
+  cursor: pointer;
+}

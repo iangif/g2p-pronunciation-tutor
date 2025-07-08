@@ -1,3 +1,5 @@
+import { renderPhonemeBloom } from './bloom.js';
+
 export const definitionCache = {}
 
 export const translations = {
@@ -56,15 +58,7 @@ export async function fetchDefinition(word) {
 }
 
 export function drawPhonemeSignature(canvas, phonemeStr) {
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (!phonemeStr) return;
-
-  const phonemes = phonemeStr.split(' ');
-  phonemes.forEach((phoneme, i) => {
-    ctx.fillStyle = `hsl(${i * 45 % 360}, 70%, 60%)`;
-    ctx.fillRect(i * 40 + 10, 100 - (i % 4) * 20, 30, (i % 4) * 20 + 20);
-  });
+  renderPhonemeBloom(canvas, phonemeStr);
 }
 
 export function flipFlashcard() {

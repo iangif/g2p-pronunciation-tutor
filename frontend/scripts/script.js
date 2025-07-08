@@ -1,3 +1,4 @@
+import { renderPhonemeBloom } from "./bloom.js";
 import {
   displayPhonemes,
   fetchDefinition,
@@ -168,6 +169,12 @@ window.addEventListener('similar-word-clicked', (e) => {
 
   // Trigger form submission
   document.getElementById('input-form').dispatchEvent(new Event('submit'));
+})
+
+const bloomCanvas = document.getElementById('phoneme-canvas');
+bloomCanvas.addEventListener('click', () => {
+  const phonemes = languageState[currentLang]?.modelPhonemes;
+  if (phonemes) renderPhonemeBloom(bloomCanvas, phonemes);
 })
 
 // Update UI Logic (when refresh, language swap, etc.)
