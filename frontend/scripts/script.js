@@ -198,7 +198,7 @@ bloomCanvas.addEventListener('click', () => {
   }
 });
 
-// Save Button Logic --------------------------------------------------------------------------------------------------HERE
+// Save Button Logic 
 document.getElementById('save-button').addEventListener('click', () => {
   const state = languageState[currentLang];
   const flashcard = {

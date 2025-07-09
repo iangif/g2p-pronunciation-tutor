@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Flashcards</title>
+  <link rel="stylesheet" href="styles/flashcards.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>My Flashcards</h1>
+    
+    <div class="controls">
+      <button id="toggle-dark">Dark Mode</button>
+      <button id="enter-review">Start Review Mode</button>
+    </div>
+
+    <div id="flashcard-grid" class="flashcard-grid">
+      <div id="flashcard-container">
+        <!-- Flashcards will be inserted here dynamically -->
+      </div>
+    </div>
+
+    <div id="review-mode" class="review-mode hidden">
+      <h2>Review Mode</h2>
+      <div class="flashcard review-flashcard">
+        <div class="front"></div>
+        <div class="back"></div>
+      </div>
+      <div class="review-controls">
+        <button id="prev-review">Previous</button>
+        <button id="flip-review">Flip</button>
+        <button id="next-review">Next</button>
+        <button id="exit-review">Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="scripts/my_flashcards.js"></script>
+</body>
+</html>
