@@ -1,88 +1,6 @@
-/*
 import { getPhonemeFeatures } from './phoneme_features.js';
 
-export function renderPhonemeBloom(canvas, phonemeStr) {
-  if (!canvas || !phonemeStr) return;
-  
-  const ctx = canvas.getContext('2d');
-  const { width, height } = canvas;
-  ctx.clearRect(0, 0, width, height);
-
-  const phonemes = phonemeStr.trim().split(/\s+/);
-
-  const mannerToColor = {
-    vowel: '#4ad12c',      // green
-    glide: '#4d2ee8',      // indigo
-    liquid: '#e64839',     // red
-    nasal: '#fafa41',      // yellow
-    fricative: '#2994f2',  // blue
-    affricate: '#d038e0',  // violet
-    plosive: '#fca71e'     // orange
-  };
-
-  const centerX = width / 2;
-  const centerY = height / 2;
-  const baseRadius = 20;
-  const spiralSpacing = 0.5;
-
-  let frame = 0;
-
-  const repeatCount = 13;
-  for (let r = 0; r < repeatCount; r++) {
-    const opacity = 1 - (r / repeatCount);
-    ctx.globalAlpha = opacity;
-    [...phonemes].reverse().forEach((p, iRev) => {
-      const index = phonemes.length - 1 - iRev;
-      const globalIndex = r * phonemes.length + index;
-      const features = getPhonemeFeatures(p);
-
-      const angle = globalIndex * 1.618;
-      const radius = baseRadius + spiralSpacing * angle;
-
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
-
-      const dx = centerX - x;
-      const dy = centerY - y;
-      const rotationAngle = Math.atan2(dy, dx);
-
-      const color = mannerToColor[features.manner] || '#999';
-      const isVoiced = features.voiced || false;
-      const isRounded = features.rounded || false;
-      const stress = features.stress;
-
-      const size = 12;
-
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(rotationAngle + Math.PI/2*3);
-      ctx.strokeStype = 'black';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      if (!isVoiced) {
-        // Voiceless – sharp or slit-like petal
-        ctx.moveTo(0, -size);
-        ctx.lineTo(size * 0.4, size);
-        ctx.lineTo(-size * 0.4, size);
-        ctx.closePath();
-      } else if (isRounded) {
-        // Rounded vowel – circular petal
-        ctx.ellipse(0, 0, size * 0.7, size, 0, 0, 2 * Math.PI)
-      } else {
-        // Voiced – teardrop-like ellipse
-        ctx.ellipse(0, 0, size * 0.3, size, 0, 0, 2 * Math.PI);
-      }
-
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.restore();
-    });
-  }
-}
-*/
-import { getPhonemeFeatures } from './phoneme_features.js';
-
-export function renderPhonemeBloom(canvas, phonemeStr) {
+export function renderPhonemeBloom(canvas, phonemeStr, isAnimation=true) {
   if (!canvas || !phonemeStr) return;
 
   const ctx = canvas.getContext('2d');
@@ -105,7 +23,7 @@ export function renderPhonemeBloom(canvas, phonemeStr) {
     plosive: '#fca71e'     // orange
   };
 
-  const repeatCount = 15;
+  const repeatCount = 18;
   const totalPetals = repeatCount * phonemes.length;
   let frame = 0;
 
@@ -124,7 +42,7 @@ export function renderPhonemeBloom(canvas, phonemeStr) {
     const globalIndex = frame;
 
     const delayNorm = globalIndex / totalPetals;
-    const delay = 60 - 200 * easeOutCubic(delayNorm);
+    const delay = 100 - 180 * easeOutCubic(delayNorm);
 
     const features = getPhonemeFeatures(p);
     const angle = globalIndex * 1.618;
@@ -166,7 +84,11 @@ export function renderPhonemeBloom(canvas, phonemeStr) {
     ctx.restore();
 
     frame++;
-    setTimeout(() => requestAnimationFrame(drawNextPetal), delay);
+    if(isAnimation) {
+      setTimeout(() => requestAnimationFrame(drawNextPetal), delay);
+    } else {
+      drawNextPetal();
+    }
   }
 
   drawNextPetal();

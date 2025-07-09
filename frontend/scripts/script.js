@@ -44,7 +44,7 @@ document.getElementById('input-form').addEventListener('submit', async function 
   document.getElementById('model-output').textContent = 'Loading...';
   document.getElementById('similar-words').innerHTML = '';
   document.getElementById('media-clips').textContent = 'Loading...';
-  document.getElementById('flashcard-front').textContent = 'Loading...';
+  document.getElementById('flashcard-front-word').textContent = 'Loading...';
   document.getElementById('flashcard-back').textContent = 'Loading...';
 
   showSpinner();
@@ -87,7 +87,19 @@ document.getElementById('input-form').addEventListener('submit', async function 
 
     // Flashcards
     document.getElementById('flashcard-back').innerHTML = renderFlashcardBack(data);
-    document.getElementById('flashcard-front').textContent = renderFlashcardFront(input);
+    const flashcardCanvas = document.getElementById('flashcard-canvas');
+    document.getElementById('flashcard-front-word').textContent = renderFlashcardFront(input, flashcardCanvas, data.modelPhonemes);
+    // Add playback
+    setTimeout(() => {
+      const playBtn = document.getElementById('play-audio');
+      if (playBtn && languageState[currentLang]?.input) {
+        playBtn.addEventListener('click', () => {
+          const utterance = new SpeechSynthesisUtterance(languageState[currentLang].input);
+          utterance.lang = currentLang === 'fr' ? 'fr-FR' : 'en-US';
+          speechSynthesis.speak(utterance);
+        });
+      }
+    }, 0);
 
     // Draw phoneme signature
     drawPhonemeSignature(document.getElementById('phoneme-canvas'), data.modelPhonemes);
@@ -171,10 +183,53 @@ window.addEventListener('similar-word-clicked', (e) => {
   document.getElementById('input-form').dispatchEvent(new Event('submit'));
 })
 
+// Bloom event listener
+let isBloomingAnimation = false;
 const bloomCanvas = document.getElementById('phoneme-canvas');
 bloomCanvas.addEventListener('click', () => {
+  if (isBloomingAnimation) return;
+  isBloomingAnimation = true;
   const phonemes = languageState[currentLang]?.modelPhonemes;
-  if (phonemes) renderPhonemeBloom(bloomCanvas, phonemes);
+  if (phonemes) {
+    renderPhonemeBloom(bloomCanvas, phonemes);
+    setTimeout(() => {
+      isBloomingAnimation = false;
+    }, 2400);
+  }
+});
+
+// Save Button Logic --------------------------------------------------------------------------------------------------HERE
+document.getElementById('save-button').addEventListener('click', () => {
+  const state = languageState[currentLang];
+  const flashcard = {
+    word: state.input,
+    ipa: state.ipa,
+    phonemes: state.modelPhonemes
+  };
+
+  if (!flashcard.word || !flashcard.ipa || !flashcard.phonemes) return;
+
+  // Get current saved list
+  const saved = JSON.parse(localStorage.getItem('savedFlashcards') || '[]');
+  // Check for duplicates
+  const alreadySaved = saved.some(card =>
+    card.word === flashcard.word &&
+    card.ipa === flashcard.ipa &&
+    card.phonemes === flashcard.phonemes
+  );
+
+  if (!alreadySaved) {
+    saved.push(flashcard);
+    localStorage.setItem('savedFlashcards', JSON.stringify(saved));
+  }
+
+  const feedback = document.getElementById('save-feedback');
+  feedback.textContent = alreadySaved ? 'Already saved!' : 'Saved!';
+  feedback.classList.add('visible');
+
+  setTimeout(() => {
+    feedback.classList.remove('visible');
+  }, 1500);
 })
 
 // Update UI Logic (when refresh, language swap, etc.)
@@ -191,7 +246,7 @@ function updateUILanguage() {
   document.querySelector('.media-section h3').textContent = t.clips;
   document.querySelector('.art-section h3').textContent = t.signature;
   document.querySelector('.flashcard-section h3').textContent = t.flashcard;
-  document.getElementById('flashcard-front').textContent = t.flashcardFront;
+  document.getElementById('flashcard-front-word').textContent = t.flashcardFront;
   langToggle.textContent = t.langToggle;
 
   // Load state for selected language
@@ -224,8 +279,20 @@ function updateUILanguage() {
   } else {
     document.getElementById('flashcard-back').textContent = t.flashcardBack;
   }
+  // Add playback
+  setTimeout(() => {
+    const playBtn = document.getElementById('play-audio');
+    if (playBtn && languageState[currentLang]?.input) {
+      playBtn.addEventListener('click', () => {
+        const utterance = new SpeechSynthesisUtterance(languageState[currentLang].input);
+        utterance.lang = currentLang === 'fr' ? 'fr-FR' : 'en-US';
+        speechSynthesis.speak(utterance);
+      });
+    }
+  }, 0);
 
-  document.getElementById('flashcard-front').textContent = renderFlashcardFront(state.input);
+  
+  document.getElementById('flashcard-front-word').textContent = renderFlashcardFront(state.input, document.getElementById('flashcard-canvas'), state.modelPhonemes);
 
   // Redraw canvas
   drawPhonemeSignature(document.getElementById('phoneme-canvas'), state.modelPhonemes);

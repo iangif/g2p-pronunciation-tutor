@@ -119,13 +119,22 @@ export function createSimilarWordItem(entry, tooltip) {
 export function renderFlashcardBack(data) {
   return `
     <strong>IPA:</strong> ${data.ipa}<br />
-    <strong>Phonemes:</strong> ${data.modelPhonemes}<br />
-    <em>+ phoneme signature graphic</em>
+    <strong>Phonemes:</strong> ${displayPhonemes(data.modelPhonemes)}<br />
+    <button id="play-audio" class="audio-button" title="Play pronunciation">🔊</button>
   `;
+  
 }
 
-export function renderFlashcardFront(input) {
+export function renderFlashcardFront(input, canvas, phonemeStr) {
+  drawFlashcardFront(canvas, input, phonemeStr)
   return input || "Your word here";
+}
+
+function drawFlashcardFront(canvas, word, phonemeStr) {
+  if (!canvas || !word || !phonemeStr) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  renderPhonemeBloom(canvas, phonemeStr, false);
 }
 
 export function showSpinner() {

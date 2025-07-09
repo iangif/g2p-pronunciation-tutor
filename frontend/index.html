@@ -59,13 +59,23 @@
         <h3>Flashcard</h3>
         <div class="flashcard">
           <div class="front">
-            <p id="flashcard-front">Your word here</p>
+            <canvas id="flashcard-canvas" width="320" height="170"></canvas>
+            <div id="flashcard-front-word">Your word here</div>
           </div>
           <div class="back">
-            <p id="flashcard-back">IPA, phonemes, artwork</p>
+            <p id="flashcard-back">
+              IPA, phonemes, artwork
+              <button id="play-audio" class="audio-button" title="Play pronunciation">🔊</button>
+            </p>
           </div>
         </div>
-        <button id="flip-button">Flip</button>
+        <div class="flashcard-controls">
+          <button id="flip-button">Flip</button>
+          <div class="save-container">
+            <button id="save-button">Save</button>
+            <span id="save-feedback" class="save-feedback"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

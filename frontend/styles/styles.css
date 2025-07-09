@@ -153,6 +153,15 @@ canvas {
   height: 150px;
   perspective: 1000px;
   margin-bottom: 30px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flashcard .front {
+  position: relative;
+  overflow: hidden;
 }
 
 .flashcard .front, .flashcard .back {
@@ -165,11 +174,36 @@ canvas {
   backface-visibility: hidden;
   display: flex;
   align-items: center;
+  padding: 10px;
   justify-content: center;
   font-size: 1.2rem;
-  padding: 10px;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#flashcard-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+#flashcard-front-word {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 4px 8px;
+  border: 2px solid #333;
+  border-radius: 6px;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+body.dark-mode #flashcard-front-word {
+  background: rgba(20, 20, 20, 0.85);
+  border-color: #ccc;
+  color: #f0f0f0;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.08);
 }
 
 .flashcard .back {
@@ -399,9 +433,56 @@ canvas {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 4px;
-  cursor: pointer;
 }
 
 #phoneme-canvas {
   cursor: pointer;
+}
+
+.audio-button {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+  padding: 0;
+}
+
+.audio-button:hover {
+  transform: scale(1.2);
+  background: none;
+}
+
+.flashcard-controls {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.save-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+#save-feedback {
+  font-size: 0.8rem;
+  margin-top: 4px;
+  color: green;
+  height: 1em;
+  min-width: 85px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: inline-block;
+}
+
+#save-feedback.visible {
+  opacity: 1;
+}
+
+body.dark-mode #save-feedback {
+  color: #7aff7a;
 }
