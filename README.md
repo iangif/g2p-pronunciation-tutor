@@ -7,8 +7,9 @@ An interactive tool for language learners to improve pronunciation by exploring 
 - **Grapheme-to-Phoneme (G2P) Conversion**: Uses `g2p-en` to convert English text into ARPAbet phonemes and IPA.
 - **Similar Word Matching**: Finds similar-sounding words based on phoneme distance, with differences underlined in IPA.
 - **Frequency Weighting**: Prioritizes common English words to enhance relevance for learners.
-- **Phoneme Signature Visualization** *(in progress)*: Generates visual cues to aid in sound memory.
-- **Flashcard Support** *(planned)*: Uses phoneme structure, IPA, and audio examples to create engaging study tools.
+- **Audio Clip Matching**: Searches through database to find clips of native speakers saying specifc word.
+- **Phoneme Signature Visualization**: Generates visual cues based on phonetic features to aid in sound memory.
+- **Flashcard Support**: Uses phoneme structure, IPA, and audio examples to create engaging study tools.
 
 ## Technologies
 
@@ -34,7 +35,6 @@ An interactive tool for language learners to improve pronunciation by exploring 
 
 - Multilingual G2P support
 - Learner audio comparison and feedback
-- Pronunciation flashcards with memory aids
 - User accounts and spaced repetition system
 
 ---
